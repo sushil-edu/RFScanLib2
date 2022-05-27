@@ -6,8 +6,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScanUtil
+import com.example.rfscanlib.checkPermissions
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope

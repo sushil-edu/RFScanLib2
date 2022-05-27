@@ -9,7 +9,6 @@ import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.example.rfscan.getNetwork
 import com.example.rfscanlib.model.RFModel
 import java.time.LocalDateTime
 import java.util.*

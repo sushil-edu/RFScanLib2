@@ -1,4 +1,4 @@
-package com.example.rfscanlib
+package com.example.rfscan
 
 import android.Manifest
 import android.content.Context
