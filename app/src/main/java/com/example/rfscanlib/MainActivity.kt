@@ -8,11 +8,10 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import com.example.rfscan.PERMISSION_ID
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
-import com.example.rfscan.service.BackgroundService
+import com.example.rfscanlib.service.BackgroundService
 
 class MainActivity : AppCompatActivity() {
 

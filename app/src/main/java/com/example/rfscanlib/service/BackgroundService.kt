@@ -1,4 +1,4 @@
-package com.example.rfscan.service
+package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScanUtil
 import com.example.rfscanlib.model.RFModel
