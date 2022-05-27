@@ -12,16 +12,16 @@ import java.util.*
 
 class RFScan {
 
-    private lateinit var carrierName: String
+    private  var carrierName: String=""
     private  var isHomeNetwork: Boolean = false
     private var rsrp: Double=0.0
     private var rsrq: Double=0.0
     private var sinr: Long=0
     private var pci: Int=0
-    private lateinit var networkType: String
-    private lateinit var lteBand: String
-    private lateinit var longitude: String
-    private lateinit var latitude: String
+    private var networkType: String=""
+    private var lteBand: String=""
+    private var longitude: String=""
+    private var latitude: String=""
     private var timestamp: Long=0
     private var localTime: String=""
     private var timeZone: String=""
