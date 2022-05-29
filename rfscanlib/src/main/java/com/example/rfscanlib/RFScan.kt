@@ -6,6 +6,7 @@ import android.content.Context
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.rfscan.checkPermissions
@@ -32,65 +33,71 @@ class RFScan {
 
     @SuppressLint("MissingPermission")
     fun getRFInfo(context: Context): RFModel {
-        if(checkPermissions(context)){
-            val tm: TelephonyManager =
-                context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
-            val data = tm.allCellInfo
-            try {
-                for (info in data) {
+        try {
+            if(checkPermissions(context)){
+                val tm: TelephonyManager =
+                    context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
+                val data = tm.allCellInfo
+                try {
+                    for (info in data) {
 
-                    when (info) {
-                        is CellInfoGsm -> {
-                            val gsm = info.cellSignalStrength
-                            rsrp = 0.0
-                            rsrq = 0.0
-                            sinr = 0
-                            lteBand = gsm.level.toString()
-                            pci = 0
-                        }
-                        /*is CellInfoCdma -> {
-                            val cdma = info.cellSignalStrength.cdmaDbm
-                        }*/
+                        when (info) {
+                            is CellInfoGsm -> {
+                                val gsm = info.cellSignalStrength
+                                rsrp = 0.0
+                                rsrq = 0.0
+                                sinr = 0
+                                lteBand = gsm.level.toString()
+                                pci = 0
+                            }
+                            /*is CellInfoCdma -> {
+                                val cdma = info.cellSignalStrength.cdmaDbm
+                            }*/
 
-                        is CellInfoLte -> {
-                            val lte = info.cellSignalStrength
-                            rsrp = lte.rsrp.toDouble()
-                            rsrq = lte.rsrq.toDouble()
-                            sinr = lte.rssnr.toLong()
-                            lteBand = lte.level.toString()
-                            pci = info.cellIdentity.pci
+                            is CellInfoLte -> {
+                                val lte = info.cellSignalStrength
+                                rsrp = lte.rsrp.toDouble()
+                                rsrq = lte.rsrq.toDouble()
+                                sinr = lte.rssnr.toLong()
+                                lteBand = lte.level.toString()
+                                pci = info.cellIdentity.pci
 
+                            }
+                            else -> {
+                                throw Exception("Unknown type of cell signal!")
+                            }
                         }
-                        else -> {
-                            throw Exception("Unknown type of cell signal!")
-                        }
+                        break
                     }
-                    break
+                    timestamp = Calendar.getInstance().timeInMillis
+                    localTime = LocalDateTime.now().toString()
+                    timeZone = Calendar.getInstance().time.toString().split(" ")[4]
+                    return RFModel(
+                        carrierName,
+                        isHomeNetwork,
+                        rsrp,
+                        rsrq,
+                        sinr,
+                        pci,
+                        networkType,
+                        lteBand,
+                        longitude,
+                        latitude,
+                        timestamp,
+                        localTime,
+                        timeZone
+                    )
+                } catch (e: Exception) {
+                    throw e
                 }
-                timestamp = Calendar.getInstance().timeInMillis
-                localTime = LocalDateTime.now().toString()
-                timeZone = Calendar.getInstance().time.toString().split(" ")[4]
-                return RFModel(
-                    carrierName,
-                    isHomeNetwork,
-                    rsrp,
-                    rsrq,
-                    sinr,
-                    pci,
-                    networkType,
-                    lteBand,
-                    longitude,
-                    latitude,
-                    timestamp,
-                    localTime,
-                    timeZone
-                )
-            } catch (e: Exception) {
-                throw e
+            }else{
+                requestPermissions(context as AppCompatActivity)
             }
-        }else{
-            requestPermissions(context as AppCompatActivity)
+        }catch (e: Exception){
+            Log.e("excep", e.message.toString())
         }
+
+        Log.e("RFInfo", rsrp.toString())
         return RFModel(
             carrierName,
             isHomeNetwork,
