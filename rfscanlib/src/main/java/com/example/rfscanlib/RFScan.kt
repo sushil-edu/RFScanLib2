@@ -32,7 +32,7 @@ class RFScan {
     private var timeZone: String = ""
 
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "NewApi")
     fun getRFInfo(context: Context): RFModel {
         try {
             if(checkPermissions(context)){
@@ -44,11 +44,10 @@ class RFScan {
                     isHomeNetwork = tm.isNetworkRoaming
                     networkType = getNetwork(context)
                     for (info in data) {
-
                         when (info) {
                             is CellInfoGsm -> {
                                 val gsm = info.cellSignalStrength
-                                rsrp = 0.0
+                                rsrp = gsm.dbm.toDouble()
                                 rsrq = 0.0
                                 sinr = 0
                                 lteBand = gsm.level.toString()
@@ -76,21 +75,7 @@ class RFScan {
                     timestamp = Calendar.getInstance().timeInMillis
                     localTime = LocalDateTime.now().toString()
                     timeZone = Calendar.getInstance().time.toString().split(" ")[4]
-                    return RFModel(
-                        carrierName,
-                        isHomeNetwork,
-                        rsrp,
-                        rsrq,
-                        sinr,
-                        pci,
-                        networkType,
-                        lteBand,
-                        longitude,
-                        latitude,
-                        timestamp,
-                        localTime,
-                        timeZone
-                    )
+
                 } catch (e: Exception) {
                     throw e
                 }
