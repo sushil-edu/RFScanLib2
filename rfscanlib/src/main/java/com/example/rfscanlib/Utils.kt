@@ -17,9 +17,6 @@ import java.io.FileWriter
 import java.io.IOException
 
 
-fun getDeviceSerial(): String {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "unknown" else Build.getSerial()
-}
 
 @SuppressLint("MissingPermission", "SwitchIntDef")
 fun getNetwork(context: Context): String {

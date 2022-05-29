@@ -5,7 +5,7 @@ data class RFModel(
     var isHomeNetwork: Boolean,
     var rsrp: Double,
     var rsrq: Double,
-    var sinr: Double,
+    var sinr: Long,
     var pci: Int,
     var networkType: String,
     var lteBand: String,
@@ -13,6 +13,5 @@ data class RFModel(
     var latitude: String,
     var timestamp: Long,
     val localTime: String,
-    val timeZone: String,
-    val lastDataSync: Long
+    val timeZone: String
 )

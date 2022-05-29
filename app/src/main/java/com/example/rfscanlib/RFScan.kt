@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.rfscan.checkPermissions
-import com.example.rfscan.getNetwork
 import com.example.rfscanlib.model.RFModel
 import java.time.LocalDateTime
 import java.util.*
@@ -40,9 +39,6 @@ class RFScan {
                     context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
                 val data = tm.allCellInfo
                 try {
-                    carrierName = tm.networkOperatorName
-                    isHomeNetwork = tm.isNetworkRoaming
-                    networkType = getNetwork(context)
                     for (info in data) {
 
                         when (info) {
