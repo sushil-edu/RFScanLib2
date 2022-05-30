@@ -9,7 +9,6 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.model.RFModel
 import java.time.LocalDateTime
 import java.util.*
@@ -31,7 +30,7 @@ class RFScan {
     private var timeZone: String = ""
 
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "NewApi")
     fun getRFInfo(context: Context): RFModel {
         try {
             if(checkPermissions(context)){
@@ -39,15 +38,17 @@ class RFScan {
                     context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
                 val data = tm.allCellInfo
                 try {
+
                     for (info in data) {
 
                         when (info) {
                             is CellInfoGsm -> {
                                 val gsm = info.cellSignalStrength
-                                rsrp = 0.0
+                                rsrp = gsm.dbm.toDouble()
                                 rsrq = 0.0
                                 sinr = 0
                                 lteBand = gsm.level.toString()
+                                Log.e("GSM Band", lteBand)
                                 pci = 0
                             }
                             /*is CellInfoCdma -> {
@@ -69,23 +70,20 @@ class RFScan {
                         }
                         break
                     }
-                    timestamp = Calendar.getInstance().timeInMillis
-                    localTime = LocalDateTime.now().toString()
-                    timeZone = Calendar.getInstance().time.toString().split(" ")[4]
                     return RFModel(
-                        carrierName,
-                        isHomeNetwork,
-                        rsrp,
-                        rsrq,
-                        sinr,
-                        pci,
-                        networkType,
-                        lteBand,
-                        longitude,
-                        latitude,
-                        timestamp,
-                        localTime,
-                        timeZone
+                        carrierName=tm.networkOperatorName,
+                        isHomeNetwork=!tm.isNetworkRoaming,
+                        rsrp= rsrp,
+                        rsrq = rsrq,
+                        sinr = sinr,
+                        pci = pci,
+                        networkType = getNetwork(context),
+                        lteBand = lteBand,
+                        longitude =longitude,
+                        latitude=latitude,
+                        timestamp = Calendar.getInstance().timeInMillis,
+                        localTime = LocalDateTime.now().toString(),
+                        timeZone = Calendar.getInstance().time.toString().split(" ")[4]
                     )
                 } catch (e: Exception) {
                     throw e
