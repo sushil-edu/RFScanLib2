@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScan
 import com.example.rfscanlib.model.RFModel
@@ -36,7 +37,6 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                    if (latitude != 0.0) {
-                        RFScan.getRFData(applicationContext, latitude, longitude)
 
                     }
 
@@ -83,7 +83,7 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private var locationCallback: LocationCallback = object : LocationCallback() {
+     var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -93,7 +93,7 @@ class BackgroundService : Service() {
                     this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
                             "Longitude: " + location.longitude, Toast.LENGTH_LONG
                 ).show()*/
-              //  Log.d("Location d", location.latitude.toString())
+                Log.d("Location d", location.latitude.toString())
                 latitude = location.latitude
                 longitude = location.longitude
             }

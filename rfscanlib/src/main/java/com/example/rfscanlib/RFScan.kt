@@ -52,7 +52,7 @@ class RFScan {
         }
 
         @SuppressLint("MissingPermission")
-        fun getRFData(context: Context?, latitude: Double, longitude: Double): RFModel {
+        fun getRFData(context: Context?): RFModel {
             try {
                 if (checkPermissions(context!!)) {
                     tm =
@@ -111,8 +111,8 @@ class RFScan {
                 pci = pci,
                 networkType = getNetwork(context!!),
                 lteBand = lteBand,
-                longitude = longitude,
-                latitude = latitude,
+                longitude = 0.0,
+                latitude = 0.0,
                 timestamp = Calendar.getInstance().timeInMillis,
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]

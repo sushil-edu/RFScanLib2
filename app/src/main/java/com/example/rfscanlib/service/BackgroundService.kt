@@ -1,12 +1,15 @@
 package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import com.example.rfscanlib.RFScanUtil
+import android.util.Log
 import com.example.rfscanlib.checkPermissions
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
@@ -21,28 +24,23 @@ import kotlin.math.sin
 class BackgroundService : Service() {
 
     lateinit var mainHandler: Handler
-    private var longitude: Double = 0.0
-    private var latitude: Double = 0.0
+     var longitude: Double = 0.0
+     var latitude: Double = 0.0
     private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
     var isServiceRunning = false
-    lateinit var rfModel: RFModel
 
 
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                   if (latitude != 0.0) {
-                      rfModel =
-                            RFScanUtil.instanceRFScan.getRFInfo(
-                                applicationContext,
-                                latitude,
-                                longitude
-                            )
-//                       Log.e("RF Scan", rfModel.toString())
+                    if (latitude != 0.0) {
+                       Location().longitude = longitude
+                        Location().latitude = latitude
+                       Log.e("Location", latitude.toString())
 
                     }
 
@@ -51,6 +49,7 @@ class BackgroundService : Service() {
             mainHandler.postDelayed(this, 5000)
         }
     }
+
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -97,7 +96,7 @@ class BackgroundService : Service() {
                     this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
                             "Longitude: " + location.longitude, Toast.LENGTH_LONG
                 ).show()*/
-              //  Log.d("Location d", location.latitude.toString())
+                  Log.d("Location d", location.latitude.toString())
                 latitude = location.latitude
                 longitude = location.longitude
             }
@@ -147,8 +146,15 @@ class BackgroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isServiceRunning= false
+        isServiceRunning = false
 
     }
 
 }
+
+ class Location{
+     var longitude: Double = 0.0
+     var latitude: Double=0.0
+ }
+
+
