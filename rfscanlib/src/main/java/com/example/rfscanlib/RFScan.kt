@@ -48,6 +48,7 @@ class RFScan {
                         when (info) {
                             is CellInfoGsm -> {
                                 val gsm = info.cellSignalStrength
+                                Log.e("GSM Data", gsm.toString())
                                 rsrp = gsm.dbm.toDouble()
                                 rsrq = 0.0
                                 sinr = 0
@@ -60,6 +61,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
+                                Log.e("Lte data", lte.toString())
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
