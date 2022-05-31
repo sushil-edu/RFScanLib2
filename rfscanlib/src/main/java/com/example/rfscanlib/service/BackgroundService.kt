@@ -38,12 +38,12 @@ class BackgroundService : Service() {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                    if(longitude!=0.0) {
-                        rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
-                    }else{
+//                    if(longitude!=0.0) {
+//                        rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+//                    }else{
                         rfData.postValue(RFScan().getRFInfo(applicationContext, 0.0,0.0))
 
-                    }
+//                    }
                 }
             }
             mainHandler.postDelayed(this, (scanInterval * 1000).toLong())
@@ -84,7 +84,7 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    var locationCallback: LocationCallback = object : LocationCallback() {
+    private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -92,6 +92,7 @@ class BackgroundService : Service() {
                 val location = locationList.last()
                 latitude = location.latitude
                 longitude = location.longitude
+                log(TAG, "Location: ${latitude},${longitude}", level.INFO)
 
             }
         }
