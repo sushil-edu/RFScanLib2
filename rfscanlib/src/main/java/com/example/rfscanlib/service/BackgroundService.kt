@@ -1,18 +1,15 @@
 package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
-import com.example.rfscanlib.*
+import com.example.rfscanlib.RFScan
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
@@ -25,31 +22,29 @@ class BackgroundService : Service() {
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
+    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    companion object{
-        var isServiceRunning = false
-        var scanInterval : Int = 0
-        var rfData = MutableLiveData<RFModel>()
+    var isServiceRunning = false
+    lateinit var rfModel: RFModel
+    var rfLiveData= MutableLiveData<RFModel>()
 
-    }
+
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-//                    if(longitude!=0.0) {
-//                        rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
-//                    }else{
-                        rfData.postValue(RFScan().getRFInfo(applicationContext, 0.0,0.0))
+                    if (latitude != 0.0) {
+                        rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+                    }
 
-//                    }
                 }
             }
-            mainHandler.postDelayed(this, (scanInterval * 1000).toLong())
+            mainHandler.postDelayed(this, 5000)
         }
-
     }
+
 
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -58,7 +53,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (scanInterval *1000).toLong()
+        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -66,10 +61,13 @@ class BackgroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mainHandler = Handler(Looper.getMainLooper())
+
         mainHandler.post(scheduleRFScan)
+
         startLocationUpdates()
 
         val channelID = "1234"
+
         val notificationChannel = NotificationChannel(
             channelID, channelID, NotificationManager.IMPORTANCE_LOW
         )
@@ -84,16 +82,19 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private var locationCallback: LocationCallback = object : LocationCallback() {
+    var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
             if (locationList.isNotEmpty()) {
                 val location = locationList.last()
+                /*Toast.makeText(
+                    this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
+                            "Longitude: " + location.longitude, Toast.LENGTH_LONG
+                ).show()*/
+                Log.d("Location d", location.latitude.toString())
                 latitude = location.latitude
                 longitude = location.longitude
-                log(TAG, "Location: ${latitude},${longitude}", level.INFO)
-
             }
         }
     }
@@ -103,7 +104,7 @@ class BackgroundService : Service() {
         super.onCreate()
 
         isServiceRunning = true
-        log(TAG,"Service started", level.INFO)
+
         initData()
 
 
@@ -120,7 +121,7 @@ class BackgroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isServiceRunning = false
+        isServiceRunning= false
 
     }
 
