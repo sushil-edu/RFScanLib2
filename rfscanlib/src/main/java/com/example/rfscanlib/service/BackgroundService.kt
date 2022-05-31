@@ -31,10 +31,12 @@ class BackgroundService(backgroundServiceInterval: Int) : Service() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    var isServiceRunning = false
     lateinit var rfModel: RFModel
 
-
+    companion object{
+        var isServiceRunning = false
+        var scanInterval : Int = 0
+    }
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
@@ -44,7 +46,7 @@ class BackgroundService(backgroundServiceInterval: Int) : Service() {
 
                 }
             }
-            mainHandler.postDelayed(this, (backgroundServiceInterval * 100).toLong())
+            mainHandler.postDelayed(this, (scanInterval * 1000).toLong())
         }
     }
 
@@ -55,7 +57,7 @@ class BackgroundService(backgroundServiceInterval: Int) : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = locationRefreshInterval
+        locationRequest!!.interval = (scanInterval*1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
