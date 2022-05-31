@@ -40,6 +40,9 @@ class BackgroundService : Service() {
                 if (checkPermissions(applicationContext)) {
                     if(longitude!=0.0) {
                         rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+                    }else{
+                        rfData.postValue(RFScan().getRFInfo(applicationContext, 0.0,0.0))
+
                     }
                 }
             }
