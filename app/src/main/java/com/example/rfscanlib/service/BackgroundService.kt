@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.location.Location
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -17,11 +16,6 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.security.auth.callback.Callback
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
-
 
 class BackgroundService : Service() {
 
@@ -30,9 +24,6 @@ class BackgroundService : Service() {
     private var latitude: Double = 0.0
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
-
-
-    lateinit var rfModel: RFModel
 
     companion object{
         var isServiceRunning = false
@@ -54,11 +45,6 @@ class BackgroundService : Service() {
 
     }
 
-    var callback:Callback = object: Callback {
-        fun getRFData(rfModel: RFModel): RFModel {
-            return  rfModel
-        }
-    }
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
@@ -78,7 +64,7 @@ class BackgroundService : Service() {
 
         startLocationUpdates()
 
-        val channelID = "1234"
+  /*      val channelID = "1234"
 
         val notificationChannel = NotificationChannel(
             channelID, channelID, NotificationManager.IMPORTANCE_LOW
@@ -90,7 +76,7 @@ class BackgroundService : Service() {
             .setContentText("App running in background")
             .setContentTitle("RFScan")
 //            .setSmallIcon(R.mipmap.ic_launcher)
-        startForeground(1001, notificationBuilder.build())
+        startForeground(1001, notificationBuilder.build())*/
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -110,12 +96,9 @@ class BackgroundService : Service() {
     @SuppressLint("MissingPermission")
     override fun onCreate() {
         super.onCreate()
-
         isServiceRunning = true
         log(TAG,"Service started", level.INFO)
         initData()
-
-
     }
 
     @SuppressLint("MissingPermission")
@@ -126,27 +109,6 @@ class BackgroundService : Service() {
         )
     }
 
-
-    private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val theta = lon1 - lon2
-        var dist = (sin(deg2rad(lat1))
-                * sin(deg2rad(lat2))
-                + (cos(deg2rad(lat1))
-                * cos(deg2rad(lat2))
-                * cos(deg2rad(theta))))
-        dist = acos(dist)
-        dist = rad2deg(dist)
-        dist *= 60 * 1.1515 //in meter
-        return dist
-    }
-
-    private fun deg2rad(deg: Double): Double {
-        return deg * Math.PI / 180.0
-    }
-
-    private fun rad2deg(rad: Double): Double {
-        return rad * 180.0 / Math.PI
-    }
 
     override fun onDestroy() {
         super.onDestroy()
