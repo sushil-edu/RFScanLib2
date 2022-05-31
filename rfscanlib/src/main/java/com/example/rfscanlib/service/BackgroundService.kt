@@ -10,8 +10,11 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScan
+import com.example.rfscanlib.level
+import com.example.rfscanlib.log
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +98,7 @@ class BackgroundService : Service() {
                     this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
                             "Longitude: " + location.longitude, Toast.LENGTH_LONG
                 ).show()*/
-                Log.d("Location d", location.latitude.toString())
+               log(TAG, "Location: ${location.latitude.toString()}", level.INFO)
                 latitude = location.latitude
                 longitude = location.longitude
             }
@@ -107,7 +110,7 @@ class BackgroundService : Service() {
         super.onCreate()
 
         isServiceRunning = true
-
+        log(TAG,"Service started", level.INFO)
         initData()
 
 

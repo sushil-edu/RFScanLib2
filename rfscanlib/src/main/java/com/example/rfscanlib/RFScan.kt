@@ -10,12 +10,14 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.getNetwork
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
 import java.time.LocalDateTime
 import java.util.*
+import java.util.logging.Level
 
 class RFScan {
 
@@ -45,14 +47,15 @@ class RFScan {
                     BackgroundService.scanInterval = backgroundServiceInterval
                     context.startForegroundService(Intent(context, BackgroundService::class.java))
                 } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
-                    context.stopService(Intent(context, BackgroundService::class.java))
+                   stopService(context)
                 }
             }
         }
 
         fun stopService(context: Context?) {
             context?.stopService(Intent(context, BackgroundService::class.java))
-            Log.i("Background Service", "Stopped")
+            log(TAG, "Service Stopped", level.INFO)
+
         }
 
 
@@ -79,6 +82,7 @@ class RFScan {
                                 sinr = 0
                                 lteBand = gsm.level.toString()
                                 pci = 0
+                                log(TAG, "GSM ${gsm.toString()}", level.INFO)
                             }
                             /*is CellInfoCdma -> {
                                 val cdma = info.cellSignalStrength.cdmaDbm
@@ -86,7 +90,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                Log.e("Lte data", lte.toString())
+                                log(TAG, "LTE ${lte.toString()}", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
@@ -95,6 +99,7 @@ class RFScan {
 
                             }
                             else -> {
+                                log(TAG, "Exception: Unknown type of cell signal!", level.INFO)
                                 throw Exception("Unknown type of cell signal!")
                             }
                         }
@@ -111,10 +116,11 @@ class RFScan {
                 requestPermissions(context as AppCompatActivity)
             }
         } catch (e: Exception) {
-            Log.e("excep", e.message.toString())
+            log(TAG, e.message.toString(), level.ERROR)
+
         }
 
-        Log.e("RFInfo", rsrp.toString())
+        log(TAG, "RF Data: ${rsrp.toString()}", level.INFO)
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
@@ -124,8 +130,8 @@ class RFScan {
             pci = pci,
             networkType = getNetwork(context),
             lteBand = lteBand,
-            longitude = longitude.toDouble(),
-            latitude = latitude.toDouble(),
+            longitude = longitude,
+            latitude = latitude,
             timestamp = Calendar.getInstance().timeInMillis,
             localTime = LocalDateTime.now().toString(),
             timeZone = Calendar.getInstance().time.toString().split(" ")[4]
