@@ -9,8 +9,8 @@ data class RFModel(
     var pci: Int,
     var networkType: String,
     var lteBand: String,
-    var longitude: String,
-    var latitude: String,
+    var longitude: Double=0.0,
+    var latitude: Double=0.0,
     var timestamp: Long,
     val localTime: String,
     val timeZone: String

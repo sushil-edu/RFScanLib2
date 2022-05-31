@@ -6,16 +6,18 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.location.Location
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
-import com.example.rfscanlib.checkPermissions
+import androidx.lifecycle.MutableLiveData
+import com.example.rfscanlib.*
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.security.auth.callback.Callback
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.sin
@@ -24,40 +26,46 @@ import kotlin.math.sin
 class BackgroundService : Service() {
 
     lateinit var mainHandler: Handler
-     var longitude: Double = 0.0
-     var latitude: Double = 0.0
-    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
+    private var longitude: Double = 0.0
+    private var latitude: Double = 0.0
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    var isServiceRunning = false
 
+    lateinit var rfModel: RFModel
 
+    companion object{
+        var isServiceRunning = false
+        var scanInterval : Int = 0
+        var rfData = MutableLiveData<RFModel>()
+
+    }
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                    if (latitude != 0.0) {
-                       Location().longitude = longitude
-                        Location().latitude = latitude
-                       Log.e("Location", latitude.toString())
-
+                    if(longitude!=0.0) {
+                        rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
                     }
-
                 }
             }
-            mainHandler.postDelayed(this, 5000)
+            mainHandler.postDelayed(this, (scanInterval * 1000).toLong())
         }
+
     }
 
-
+    var callback:Callback = object: Callback {
+        fun getRFData(rfModel: RFModel): RFModel {
+            return  rfModel
+        }
+    }
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
+        locationRequest!!.interval = (scanInterval*1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -86,19 +94,15 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private var locationCallback: LocationCallback = object : LocationCallback() {
+    var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
             if (locationList.isNotEmpty()) {
                 val location = locationList.last()
-                /*Toast.makeText(
-                    this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
-                            "Longitude: " + location.longitude, Toast.LENGTH_LONG
-                ).show()*/
-                  Log.d("Location d", location.latitude.toString())
                 latitude = location.latitude
                 longitude = location.longitude
+
             }
         }
     }
@@ -108,7 +112,7 @@ class BackgroundService : Service() {
         super.onCreate()
 
         isServiceRunning = true
-
+        log(TAG,"Service started", level.INFO)
         initData()
 
 
@@ -151,10 +155,3 @@ class BackgroundService : Service() {
     }
 
 }
-
- class Location{
-     var longitude: Double = 0.0
-     var latitude: Double=0.0
- }
-
-
