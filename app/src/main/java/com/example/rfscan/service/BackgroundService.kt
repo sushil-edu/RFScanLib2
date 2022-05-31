@@ -1,5 +1,4 @@
 package com.example.rfscanlib.service
-
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
@@ -10,12 +9,15 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
+import com.example.rfscan.TAG
+import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.*
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 class BackgroundService : Service() {
 
@@ -36,6 +38,7 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if(longitude!=0.0) {
+
                         rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
                     }
                 }
@@ -45,13 +48,14 @@ class BackgroundService : Service() {
 
     }
 
+
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (scanInterval*1000).toLong()
+        locationRequest!!.interval = (scanInterval *1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -59,13 +63,10 @@ class BackgroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mainHandler = Handler(Looper.getMainLooper())
-
         mainHandler.post(scheduleRFScan)
-
         startLocationUpdates()
 
-  /*      val channelID = "1234"
-
+        val channelID = "1234"
         val notificationChannel = NotificationChannel(
             channelID, channelID, NotificationManager.IMPORTANCE_LOW
         )
@@ -76,7 +77,7 @@ class BackgroundService : Service() {
             .setContentText("App running in background")
             .setContentTitle("RFScan")
 //            .setSmallIcon(R.mipmap.ic_launcher)
-        startForeground(1001, notificationBuilder.build())*/
+        startForeground(1001, notificationBuilder.build())
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -96,9 +97,12 @@ class BackgroundService : Service() {
     @SuppressLint("MissingPermission")
     override fun onCreate() {
         super.onCreate()
+
         isServiceRunning = true
         log(TAG,"Service started", level.INFO)
         initData()
+
+
     }
 
     @SuppressLint("MissingPermission")

@@ -22,26 +22,26 @@ class BackgroundService : Service() {
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
-    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    var isServiceRunning = false
-    var rfLiveData= MutableLiveData<RFModel>()
-
+    companion object {
+        var isServiceRunning = false
+        var rfLiveData = MutableLiveData<RFModel>()
+        var scanInterval: Int = 0
+    }
 
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                   // if (latitude != 0.0) {
+                    if (latitude != 0.0) {
                         rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
-                    //}
-                    Log.d("Location dd", latitude.toString())
+                    }
 
                 }
             }
-            mainHandler.postDelayed(this, 5000)
+            mainHandler.postDelayed(this, (scanInterval*1000).toLong())
         }
     }
 
@@ -53,7 +53,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
+        locationRequest!!.interval = (scanInterval*1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -82,7 +82,7 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    var locationCallback: LocationCallback = object : LocationCallback() {
+    private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 

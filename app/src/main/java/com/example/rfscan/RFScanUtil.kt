@@ -18,7 +18,7 @@ class RFScanUtil {
     private var RSRQ: Double = 0.0
     private var RSRP: Double = 0.0
     private var PCI: Int = 0
-    private var SNR: Double = 0.0
+    private var SNR: Long = 0
     private var lteBand: String = ""
 
     private val lstRFData: MutableList<RFModel> = ArrayList()
@@ -50,7 +50,7 @@ class RFScanUtil {
                         val gsm = info.cellSignalStrength
                         RSRP = 0.0
                         RSRQ = 0.0
-                        SNR = 0.0
+                        SNR = 0
                         lteBand = gsm.level.toString()
                         PCI = 0
                     }
@@ -62,7 +62,7 @@ class RFScanUtil {
                         var lte = info.cellSignalStrength
                         RSRP = lte.rsrp.toDouble()
                         RSRQ = lte.rsrq.toDouble()
-                        SNR = lte.rssnr.toDouble()
+                        SNR = lte.rssnr.toLong()
                         lteBand = lte.level.toString()
                         PCI = info.cellIdentity.pci
 
@@ -95,12 +95,11 @@ class RFScanUtil {
                 pci = PCI,
                 networkType = getNetwork(context),
                 lteBand = lteBand,
-                longitude = longitude.toString(),
-                latitude = latitude.toString(),
+                longitude = longitude,
+                latitude = latitude,
                 timestamp = Calendar.getInstance().timeInMillis,
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4],
-                lastDataSync = Calendar.getInstance().timeInMillis
 
             )
 

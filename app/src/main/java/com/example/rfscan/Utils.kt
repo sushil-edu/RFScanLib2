@@ -16,6 +16,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
+val TAG="RFLib"
 
 fun getDeviceSerial(): String {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "unknown" else Build.getSerial()

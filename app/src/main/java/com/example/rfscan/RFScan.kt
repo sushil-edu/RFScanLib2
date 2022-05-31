@@ -1,6 +1,5 @@
 package com.example.rfscanlib
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,7 @@ import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.getNetwork
 import com.example.rfscan.requestPermissions
@@ -22,7 +21,6 @@ class RFScan {
 
 
     companion object {
-        private lateinit var tm: TelephonyManager
         private var carrierName: String = ""
         private var isHomeNetwork: Boolean = false
         private var rsrp: Double = 0.0
@@ -35,26 +33,27 @@ class RFScan {
         private var localTime: String = ""
         private var timeZone: String = ""
 
-        fun startService(context: Context, isBackgroundService: Boolean, scanInterval: Int): String {
-            return if (!BackgroundService.isServiceRunning && isBackgroundService) {
-                BackgroundService.scanInterval = scanInterval
-                context.startForegroundService(Intent(context, BackgroundService::class.java))
-                "Service started"
-            } else {
-                "Service already running"
+        fun startService(
+            context: Context,
+            isBackgroundService: Boolean,
+            backgroundServiceInterval: Int
+        ) {
+            if (isBackgroundService) {
+                if (!BackgroundService.isServiceRunning && isBackgroundService) {
+                    BackgroundService.scanInterval = backgroundServiceInterval
+                    context.startForegroundService(Intent(context, BackgroundService::class.java))
+                }
             }
         }
 
-        fun stopService(context: Context?): String {
+       private fun stopService(context: Context?) {
             context?.stopService(Intent(context, BackgroundService::class.java))
-            return "Service Stopped"
+            log(TAG, "Service Stopped", level.INFO)
         }
-
-
     }
 
     @SuppressLint("MissingPermission")
-    fun getRFInfo(context: Context, longitude: Double, latitude: Double, ): RFModel {
+    fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
         try {
             if (checkPermissions(context)) {
                 val tm: TelephonyManager =
@@ -74,6 +73,7 @@ class RFScan {
                                 sinr = 0
                                 lteBand = gsm.level.toString()
                                 pci = 0
+                                log(TAG, "GSM ${gsm.toString()}", level.INFO)
                             }
                             /*is CellInfoCdma -> {
                                 val cdma = info.cellSignalStrength.cdmaDbm
@@ -81,7 +81,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                Log.e("Lte data", lte.toString())
+                                log(TAG, "LTE ${lte.toString()}", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
@@ -90,6 +90,7 @@ class RFScan {
 
                             }
                             else -> {
+                                log(TAG, "Exception: Unknown type of cell signal!", level.INFO)
                                 throw Exception("Unknown type of cell signal!")
                             }
                         }
@@ -106,10 +107,10 @@ class RFScan {
                 requestPermissions(context as AppCompatActivity)
             }
         } catch (e: Exception) {
-            Log.e("excep", e.message.toString())
+            log(TAG, e.message.toString(), level.ERROR)
+
         }
 
-      //  Log.e("RFInfo", rsrp.toString())
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
@@ -127,19 +128,4 @@ class RFScan {
         )
     }
 
-    private val PERMISSION_ID = 42
-
-    private fun requestPermissions(context: AppCompatActivity) {
-        ActivityCompat.requestPermissions(
-            context,
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.READ_SMS,
-                Manifest.permission.READ_PHONE_NUMBERS,
-            ),
-            PERMISSION_ID
-        )
-    }
 }
