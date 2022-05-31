@@ -6,7 +6,6 @@ import android.content.Intent
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
@@ -38,14 +37,14 @@ class RFScan {
             isBackgroundService: Boolean,
             backgroundServiceInterval: Int
         ) {
-            if (isBackgroundService) {
-                if (!BackgroundService.isServiceRunning && isBackgroundService) {
-                    BackgroundService.scanInterval = backgroundServiceInterval
-                    context.startForegroundService(Intent(context, BackgroundService::class.java))
-                } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
-                   stopService(context)
-                }
+
+            if (!BackgroundService.isServiceRunning && isBackgroundService) {
+                BackgroundService.scanInterval = backgroundServiceInterval
+                context.startForegroundService(Intent(context, BackgroundService::class.java))
+            } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
+                stopService(context)
             }
+
         }
 
         fun stopService(context: Context?) {
@@ -72,7 +71,7 @@ class RFScan {
                         when (info) {
                             is CellInfoGsm -> {
                                 val gsm = info.cellSignalStrength
-                                log(TAG,"GSM Data ${gsm.toString()}", level.INFO)
+                                log(TAG, "GSM Data $gsm", level.INFO)
                                 rsrp = gsm.dbm.toDouble()
                                 rsrq = 0.0
                                 sinr = 0
@@ -85,7 +84,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                log(TAG, "LTE ${lte.toString()}", level.INFO)
+                                log(TAG, "LTE $lte", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
