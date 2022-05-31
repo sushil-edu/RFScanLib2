@@ -72,13 +72,12 @@ class RFScan {
                         when (info) {
                             is CellInfoGsm -> {
                                 val gsm = info.cellSignalStrength
-                                Log.e("GSM Data", gsm.toString())
+                             //   log(TAG,"GSM Data ${gsm.toString()}", level.INFO)
                                 rsrp = gsm.dbm.toDouble()
                                 rsrq = 0.0
                                 sinr = 0
                                 lteBand = gsm.level.toString()
                                 pci = 0
-                                log(TAG, "GSM ${gsm.toString()}", level.INFO)
                             }
                             /*is CellInfoCdma -> {
                                 val cdma = info.cellSignalStrength.cdmaDbm
@@ -86,7 +85,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                log(TAG, "LTE ${lte.toString()}", level.INFO)
+                                //log(TAG, "LTE ${lte.toString()}", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
@@ -115,7 +114,7 @@ class RFScan {
             log(TAG, e.message.toString(), level.ERROR)
 
         }
-
+        log(TAG, "Location ${longitude}::${latitude}", level.INFO)
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
