@@ -27,7 +27,6 @@ class BackgroundService : Service() {
     private var locationRequest: LocationRequest? = null
 
     var isServiceRunning = false
-    lateinit var rfModel: RFModel
     var rfLiveData= MutableLiveData<RFModel>()
 
 
@@ -35,9 +34,10 @@ class BackgroundService : Service() {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                    if (latitude != 0.0) {
+                   // if (latitude != 0.0) {
                         rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
-                    }
+                    //}
+                    Log.d("Location dd", latitude.toString())
 
                 }
             }
