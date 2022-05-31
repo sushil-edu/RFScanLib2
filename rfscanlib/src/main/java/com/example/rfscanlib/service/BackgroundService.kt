@@ -22,12 +22,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-class BackgroundService(backgroundServiceInterval: Int) : Service() {
+class BackgroundService : Service() {
 
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
-    private val locationRefreshInterval: Long = (backgroundServiceInterval * 1000).toLong()
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 

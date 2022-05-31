@@ -42,15 +42,17 @@ class RFScan {
         ) {
             if (isBackgroundService) {
                 if (!BackgroundService.isServiceRunning && isBackgroundService) {
-                    BackgroundService.scanInterval=backgroundServiceInterval
+                    BackgroundService.scanInterval = backgroundServiceInterval
                     context.startForegroundService(Intent(context, BackgroundService::class.java))
+                } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
+                    context.stopService(Intent(context, BackgroundService::class.java))
                 }
             }
         }
 
         fun stopService(context: Context?) {
             context?.stopService(Intent(context, BackgroundService::class.java))
-            Log.i("Background Service","Stopped")
+            Log.i("Background Service", "Stopped")
         }
 
 
