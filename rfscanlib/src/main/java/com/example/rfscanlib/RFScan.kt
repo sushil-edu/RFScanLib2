@@ -17,7 +17,6 @@ import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
 import java.time.LocalDateTime
 import java.util.*
-import java.util.logging.Level
 
 class RFScan {
 
@@ -31,8 +30,6 @@ class RFScan {
         private var pci: Int = 0
         private var networkType: String = ""
         private var lteBand: String = ""
-        private var longitude: Double = 0.0
-        private var latitude: Double = 0.0
         private var timestamp: Long = 0
         private var localTime: String = ""
         private var timeZone: String = ""
@@ -47,7 +44,7 @@ class RFScan {
                     BackgroundService.scanInterval = backgroundServiceInterval
                     context.startForegroundService(Intent(context, BackgroundService::class.java))
                 } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
-                   stopService(context)
+                    stopService(context)
                 }
             }
         }
@@ -62,7 +59,7 @@ class RFScan {
     }
 
     @SuppressLint("MissingPermission")
-    fun getRFInfo(context: Context): RFModel {
+    fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
         try {
             if (checkPermissions(context)) {
                 val tm: TelephonyManager =
@@ -82,7 +79,7 @@ class RFScan {
                                 sinr = 0
                                 lteBand = gsm.level.toString()
                                 pci = 0
-                                log(TAG, "GSM ${gsm.toString()}", level.INFO)
+                                log(TAG, "GSM $gsm", level.INFO)
                             }
                             /*is CellInfoCdma -> {
                                 val cdma = info.cellSignalStrength.cdmaDbm
@@ -90,7 +87,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                log(TAG, "LTE ${lte.toString()}", level.INFO)
+                                log(TAG, "LTE $lte", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
@@ -120,7 +117,7 @@ class RFScan {
 
         }
 
-        log(TAG, "RF Data: ${rsrp.toString()}", level.INFO)
+        log(TAG, "RF Data: $rsrp", level.INFO)
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,

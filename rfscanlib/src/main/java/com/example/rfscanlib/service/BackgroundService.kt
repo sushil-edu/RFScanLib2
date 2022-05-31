@@ -32,9 +32,6 @@ class BackgroundService : Service() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-
-    lateinit var rfModel: RFModel
-
     companion object{
         var isServiceRunning = false
         var scanInterval : Int = 0
@@ -55,11 +52,7 @@ class BackgroundService : Service() {
 
     }
 
-    var callback:Callback = object: Callback {
-        fun getRFData(rfModel: RFModel): RFModel {
-            return  rfModel
-        }
-    }
+
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
@@ -74,13 +67,10 @@ class BackgroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mainHandler = Handler(Looper.getMainLooper())
-
         mainHandler.post(scheduleRFScan)
-
         startLocationUpdates()
 
         val channelID = "1234"
-
         val notificationChannel = NotificationChannel(
             channelID, channelID, NotificationManager.IMPORTANCE_LOW
         )
