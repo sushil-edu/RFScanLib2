@@ -9,17 +9,16 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
-import com.example.rfscanlib.RFScan
-import com.example.rfscanlib.level
-import com.example.rfscanlib.log
+import com.example.rfscanlib.*
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.security.auth.callback.Callback
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.sin
@@ -33,26 +32,34 @@ class BackgroundService : Service() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
+
     lateinit var rfModel: RFModel
 
     companion object{
         var isServiceRunning = false
         var scanInterval : Int = 0
+        var rfData = MutableLiveData<RFModel>()
+
     }
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-
-                    RFScan().getRFInfo(applicationContext)
-
+                    if(longitude!=0.0) {
+                        rfData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+                    }
                 }
             }
             mainHandler.postDelayed(this, (scanInterval * 1000).toLong())
         }
+
     }
 
-
+    var callback:Callback = object: Callback {
+        fun getRFData(rfModel: RFModel): RFModel {
+            return  rfModel
+        }
+    }
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
@@ -94,13 +101,9 @@ class BackgroundService : Service() {
 
             if (locationList.isNotEmpty()) {
                 val location = locationList.last()
-                /*Toast.makeText(
-                    this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
-                            "Longitude: " + location.longitude, Toast.LENGTH_LONG
-                ).show()*/
-               log(TAG, "Location: ${location.latitude.toString()}", level.INFO)
                 latitude = location.latitude
                 longitude = location.longitude
+
             }
         }
     }
