@@ -10,9 +10,6 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.rfscan.TAG
-import com.example.rfscan.checkPermissions
-import com.example.rfscan.getNetwork
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
 import java.time.LocalDateTime
@@ -44,7 +41,7 @@ class RFScan {
                     BackgroundService.scanInterval = backgroundServiceInterval
                     context.startForegroundService(Intent(context, BackgroundService::class.java))
                 } else if (BackgroundService.isServiceRunning && !isBackgroundService) {
-                    stopService(context)
+                   stopService(context)
                 }
             }
         }
@@ -79,7 +76,7 @@ class RFScan {
                                 sinr = 0
                                 lteBand = gsm.level.toString()
                                 pci = 0
-                                log(TAG, "GSM $gsm", level.INFO)
+                                log(TAG, "GSM ${gsm.toString()}", level.INFO)
                             }
                             /*is CellInfoCdma -> {
                                 val cdma = info.cellSignalStrength.cdmaDbm
@@ -87,7 +84,7 @@ class RFScan {
 
                             is CellInfoLte -> {
                                 val lte = info.cellSignalStrength
-                                log(TAG, "LTE $lte", level.INFO)
+                                log(TAG, "LTE ${lte.toString()}", level.INFO)
                                 rsrp = lte.rsrp.toDouble()
                                 rsrq = lte.rsrq.toDouble()
                                 sinr = lte.rssnr.toLong()
@@ -117,7 +114,6 @@ class RFScan {
 
         }
 
-        log(TAG, "RF Data: $rsrp", level.INFO)
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
@@ -135,19 +131,4 @@ class RFScan {
         )
     }
 
-    private val PERMISSION_ID = 42
-
-    private fun requestPermissions(context: AppCompatActivity) {
-        ActivityCompat.requestPermissions(
-            context,
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.READ_SMS,
-                Manifest.permission.READ_PHONE_NUMBERS,
-            ),
-            PERMISSION_ID
-        )
-    }
 }
