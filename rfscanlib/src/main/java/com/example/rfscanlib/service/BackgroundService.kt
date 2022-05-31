@@ -1,7 +1,10 @@
 package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
@@ -19,12 +22,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-class BackgroundService : Service() {
+class BackgroundService(backgroundServiceInterval: Int) : Service() {
 
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
-    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
+    private val locationRefreshInterval: Long = (backgroundServiceInterval * 1000).toLong()
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
@@ -36,16 +39,14 @@ class BackgroundService : Service() {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
-                   if (latitude != 0.0) {
-                        RFScan().getRFInfo(context = applicationContext)
-                    }
+
+                    RFScan().getRFInfo(applicationContext)
 
                 }
             }
-            mainHandler.postDelayed(this, 5000)
+            mainHandler.postDelayed(this, (backgroundServiceInterval * 100).toLong())
         }
     }
-
 
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -54,7 +55,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
+        locationRequest!!.interval = locationRefreshInterval
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -83,7 +84,7 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-     var locationCallback: LocationCallback = object : LocationCallback() {
+    var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -143,7 +144,7 @@ class BackgroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isServiceRunning= false
+        isServiceRunning = false
 
     }
 
