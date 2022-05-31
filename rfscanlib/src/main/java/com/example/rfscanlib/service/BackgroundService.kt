@@ -18,10 +18,6 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.security.auth.callback.Callback
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 class BackgroundService : Service() {
@@ -59,7 +55,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (scanInterval*1000).toLong()
+        locationRequest!!.interval = (scanInterval *1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)

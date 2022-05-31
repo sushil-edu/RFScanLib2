@@ -1,6 +1,5 @@
 package com.example.rfscanlib
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,10 @@ import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import com.example.rfscan.TAG
+import com.example.rfscan.checkPermissions
+import com.example.rfscan.getNetwork
+import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
 import java.time.LocalDateTime
