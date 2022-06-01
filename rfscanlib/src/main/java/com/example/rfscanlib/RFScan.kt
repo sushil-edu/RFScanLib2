@@ -31,14 +31,15 @@ class RFScan {
         private var pci: Int = 0
         private var networkType: String = ""
         private var lteBand: String = ""
+        private var longitude: String = ""
+        private var latitude: String = ""
         private var timestamp: Long = 0
         private var localTime: String = ""
         private var timeZone: String = ""
 
-        fun startService(context: Context, isBackgroundService: Boolean, scanInterval: Int): String {
-            return if (!BackgroundService.isServiceRunning ) {
-               // BackgroundService.scanInterval = scanInterval
-                context.startForegroundService(Intent(context, BackgroundService::class.java))
+        fun startService(context: Context?): String {
+            return if (!BackgroundService().isServiceRunning) {
+                context?.startForegroundService(Intent(context, BackgroundService::class.java))
                 "Service started"
             } else {
                 "Service already running"
@@ -50,11 +51,78 @@ class RFScan {
             return "Service Stopped"
         }
 
+        @SuppressLint("MissingPermission")
+        fun getRFData(context: Context?): RFModel {
+            try {
+                if (checkPermissions(context!!)) {
+                    tm =
+                        context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
+                    val data = tm.allCellInfo
+                    try {
+
+                        for (info in data) {
+                            when (info) {
+                                is CellInfoGsm -> {
+                                    val gsm = info.cellSignalStrength
+                                    Log.e("GSM Data", gsm.toString())
+                                    rsrp = gsm.dbm.toDouble()
+                                    rsrq = 0.0
+                                    sinr = 0
+                                    lteBand = gsm.level.toString()
+                                    pci = 0
+                                }
+                                /*is CellInfoCdma -> {
+                                    val cdma = info.cellSignalStrength.cdmaDbm
+                                }*/
+
+                                is CellInfoLte -> {
+                                    val lte = info.cellSignalStrength
+                                    Log.e("Lte data", lte.toString())
+                                    rsrp = lte.rsrp.toDouble()
+                                    rsrq = lte.rsrq.toDouble()
+                                    sinr = lte.rssnr.toLong()
+                                    lteBand = lte.level.toString()
+                                    pci = info.cellIdentity.pci
+
+                                }
+                                else -> {
+                                    throw Exception("Unknown type of cell signal!")
+                                }
+                            }
+                            break
+                        }
+
+                    } catch (e: Exception) {
+                        throw e
+                    }
+                } else {
+                    requestPermissions(context as AppCompatActivity)
+                }
+            } catch (e: Exception) {
+                Log.e("excep", e.message.toString())
+            }
+
+            return RFModel(
+                carrierName = tm.networkOperatorName,
+                isHomeNetwork = !tm.isNetworkRoaming,
+                rsrp = rsrp,
+                rsrq = rsrq,
+                sinr = sinr,
+                pci = pci,
+                networkType = getNetwork(context!!),
+                lteBand = lteBand,
+                longitude = 0.0,
+                latitude = 0.0,
+                timestamp = Calendar.getInstance().timeInMillis,
+                localTime = LocalDateTime.now().toString(),
+                timeZone = Calendar.getInstance().time.toString().split(" ")[4]
+            )
+        }
 
     }
 
     @SuppressLint("MissingPermission")
-    fun getRFInfo(context: Context, longitude: Double, latitude: Double, ): RFModel {
+    fun getRFInfo(context: Context): RFModel {
         try {
             if (checkPermissions(context)) {
                 val tm: TelephonyManager =
@@ -100,7 +168,6 @@ class RFScan {
                     timeZone = Calendar.getInstance().time.toString().split(" ")[4]
 
                 } catch (e: Exception) {
-                    Log.e("Exception", e.message.toString())
                     throw e
                 }
             } else {
@@ -110,7 +177,7 @@ class RFScan {
             Log.e("excep", e.message.toString())
         }
 
-      //  Log.e("RFInfo", rsrp.toString())
+        Log.e("RFInfo", rsrp.toString())
         return RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
@@ -120,8 +187,8 @@ class RFScan {
             pci = pci,
             networkType = getNetwork(context),
             lteBand = lteBand,
-            longitude = longitude,
-            latitude = latitude,
+            longitude = longitude.toDouble(),
+            latitude = latitude.toDouble(),
             timestamp = Calendar.getInstance().timeInMillis,
             localTime = LocalDateTime.now().toString(),
             timeZone = Calendar.getInstance().time.toString().split(" ")[4]

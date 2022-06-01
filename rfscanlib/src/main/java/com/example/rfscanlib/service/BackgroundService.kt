@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScan
@@ -15,6 +16,9 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 class BackgroundService : Service() {
@@ -22,27 +26,28 @@ class BackgroundService : Service() {
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
+    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    companion object {
-        var isServiceRunning = false
-        var rfLiveData = MutableLiveData<RFModel>()
-        var scanInterval: Int = 5
-    }
+    var isServiceRunning = false
+    lateinit var rfModel: RFModel
+    var rfLiveData = MutableLiveData<RFModel>()
+
 
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                      //  RFScan().getRFInfo(applicationContext, longitude, latitude)
-                       // rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+
+                        rfModel = RFScan.getRFData(applicationContext)
+                        rfLiveData.postValue(rfModel)
                     }
 
                 }
             }
-            mainHandler.postDelayed(this, (scanInterval*1000).toLong())
+            mainHandler.postDelayed(this, 5000)
         }
     }
 
@@ -54,7 +59,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (scanInterval*1000).toLong()
+        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -83,7 +88,7 @@ class BackgroundService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private var locationCallback: LocationCallback = object : LocationCallback() {
+    var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -118,6 +123,8 @@ class BackgroundService : Service() {
             this.locationCallback, Looper.myLooper()!!
         )
     }
+
+
 
 
     override fun onDestroy() {
