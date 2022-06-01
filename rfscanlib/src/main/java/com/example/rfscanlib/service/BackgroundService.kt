@@ -26,9 +26,12 @@ class BackgroundService : Service() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
-    var isServiceRunning = false
-    lateinit var rfModel: RFModel
-    var rfLiveData = MutableLiveData<RFModel>()
+   companion object{
+       var isServiceRunning = false
+       lateinit var rfModel: RFModel
+       var rfLiveData = MutableLiveData<RFModel>()
+       var interval:Int=0
+   }
 
     private val scheduleRFScan = object : Runnable {
         override fun run() {
@@ -41,7 +44,7 @@ class BackgroundService : Service() {
 
                 }
             }
-            mainHandler.postDelayed(this, 5000)
+            mainHandler.postDelayed(this, (interval*1000).toLong())
         }
     }
 
@@ -53,7 +56,7 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = UPDATE_INTERVAL_IN_MILLISECONDS
+        locationRequest!!.interval = (interval*1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)

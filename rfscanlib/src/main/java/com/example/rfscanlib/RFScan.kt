@@ -37,8 +37,9 @@ class RFScan2 {
         private var localTime: String = ""
         private var timeZone: String = ""
 
-        fun startService(context: Context?): String {
-            return if (!BackgroundService().isServiceRunning) {
+        fun startService(context: Context?, isBackgroundService: Boolean, interval: Int): String {
+            return if (!BackgroundService.isServiceRunning && isBackgroundService) {
+                BackgroundService.interval= interval
                 context?.startForegroundService(Intent(context, BackgroundService::class.java))
                 "Service started"
             } else {
