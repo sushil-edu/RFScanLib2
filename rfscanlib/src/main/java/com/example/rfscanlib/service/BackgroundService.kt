@@ -15,9 +15,6 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 class BackgroundService : Service() {
@@ -38,7 +35,7 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                        rfModel = RFScan2.getRFData(applicationContext)
+                        rfModel = RFScan2().getRFInfo(applicationContext, longitude, latitude)
                         rfLiveData.postValue(rfModel)
                     }
 

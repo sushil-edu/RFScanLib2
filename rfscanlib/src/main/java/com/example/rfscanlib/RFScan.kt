@@ -102,7 +102,7 @@ class RFScan2 {
                 Log.e("excep", e.message.toString())
             }
 
-            return RFModel(
+          val rfModel= RFModel(
                 carrierName = tm.networkOperatorName,
                 isHomeNetwork = !tm.isNetworkRoaming,
                 rsrp = rsrp,
@@ -117,12 +117,14 @@ class RFScan2 {
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
+            Log.e("RFModel", rfModel.toString())
+            return rfModel
         }
 
     }
 
     @SuppressLint("MissingPermission")
-    fun getRFInfo(context: Context): RFModel {
+    fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
         try {
             if (checkPermissions(context)) {
                 val tm: TelephonyManager =
@@ -177,8 +179,7 @@ class RFScan2 {
             Log.e("excep", e.message.toString())
         }
 
-        Log.e("RFInfo", rsrp.toString())
-        return RFModel(
+      val rfModel= RFModel(
             carrierName = carrierName,
             isHomeNetwork = isHomeNetwork,
             rsrp = rsrp,
@@ -187,12 +188,14 @@ class RFScan2 {
             pci = pci,
             networkType = getNetwork(context),
             lteBand = lteBand,
-            longitude = longitude.toDouble(),
-            latitude = latitude.toDouble(),
+            longitude = longitude,
+            latitude = latitude,
             timestamp = Calendar.getInstance().timeInMillis,
             localTime = LocalDateTime.now().toString(),
             timeZone = Calendar.getInstance().time.toString().split(" ")[4]
         )
+        Log.e("RFInfo", rfModel.toString())
+        return rfModel
     }
 
     private val PERMISSION_ID = 42
