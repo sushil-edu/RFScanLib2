@@ -6,10 +6,9 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscan.checkPermissions
-import com.example.rfscanlib.RFScan2
+import com.example.rfscanlib.RFScanLib
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +21,6 @@ class BackgroundService : Service() {
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
-    private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
@@ -38,7 +36,7 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                        rfModel = RFScan2().getRFInfo(applicationContext, longitude, latitude)
+                        rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
                         rfLiveData.postValue(rfModel)
                     }
 
@@ -68,9 +66,7 @@ class BackgroundService : Service() {
         mainHandler.post(scheduleRFScan)
 
         startLocationUpdates()
-
         val channelID = "1234"
-
         val notificationChannel = NotificationChannel(
             channelID, channelID, NotificationManager.IMPORTANCE_LOW
         )
@@ -79,7 +75,7 @@ class BackgroundService : Service() {
         )
         val notificationBuilder = Notification.Builder(this, channelID)
             .setContentText("App running in background")
-            .setContentTitle("RFScan")
+            .setContentTitle("RFScanLib")
 //            .setSmallIcon(R.mipmap.ic_launcher)
         startForeground(1001, notificationBuilder.build())
         return super.onStartCommand(intent, flags, startId)
@@ -91,11 +87,6 @@ class BackgroundService : Service() {
 
             if (locationList.isNotEmpty()) {
                 val location = locationList.last()
-                /*Toast.makeText(
-                    this@ForegroundService, "Latitude: " + location.latitude.toString() + '\n' +
-                            "Longitude: " + location.longitude, Toast.LENGTH_LONG
-                ).show()*/
-                Log.d("Location d", location.latitude.toString())
                 latitude = location.latitude
                 longitude = location.longitude
             }

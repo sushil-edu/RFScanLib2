@@ -16,7 +16,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
-val TAG="RFLib"
+const val TAG="RFLib"
 
 @SuppressLint("MissingPermission", "SwitchIntDef")
 fun getNetwork(context: Context): String {
