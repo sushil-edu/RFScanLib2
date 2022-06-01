@@ -41,8 +41,8 @@ class BackgroundService : Service() {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
 
-                        rfModel = RFScan.getRFData(applicationContext)
-                        rfLiveData.postValue(rfModel)
+//                        rfModel = RFScan.getRFData(applicationContext)
+//                        rfLiveData.postValue(rfModel)
                     }
 
                 }
