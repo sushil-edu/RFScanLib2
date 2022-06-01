@@ -100,6 +100,7 @@ class RFScan {
                     timeZone = Calendar.getInstance().time.toString().split(" ")[4]
 
                 } catch (e: Exception) {
+                    Log.e("Exception", e.message.toString())
                     throw e
                 }
             } else {

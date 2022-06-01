@@ -36,7 +36,8 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                        rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
+                      //  RFScan().getRFInfo(applicationContext, longitude, latitude)
+                       // rfLiveData.postValue(RFScan().getRFInfo(applicationContext, longitude, latitude))
                     }
 
                 }
