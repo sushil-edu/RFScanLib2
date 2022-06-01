@@ -7,7 +7,9 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.example.rfscan.checkPermissions
+import com.example.rfscanlib.RFScan2
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
@@ -29,14 +31,15 @@ class BackgroundService : Service() {
 
     var isServiceRunning = false
     lateinit var rfModel: RFModel
-
+    var rfLiveData = MutableLiveData<RFModel>()
 
     private val scheduleRFScan = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-
+                        rfModel = RFScan2.getRFData(applicationContext)
+                        rfLiveData.postValue(rfModel)
                     }
 
                 }
@@ -118,27 +121,6 @@ class BackgroundService : Service() {
         )
     }
 
-
-    private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val theta = lon1 - lon2
-        var dist = (sin(deg2rad(lat1))
-                * sin(deg2rad(lat2))
-                + (cos(deg2rad(lat1))
-                * cos(deg2rad(lat2))
-                * cos(deg2rad(theta))))
-        dist = acos(dist)
-        dist = rad2deg(dist)
-        dist *= 60 * 1.1515 //in meter
-        return dist
-    }
-
-    private fun deg2rad(deg: Double): Double {
-        return deg * Math.PI / 180.0
-    }
-
-    private fun rad2deg(rad: Double): Double {
-        return rad * 180.0 / Math.PI
-    }
 
     override fun onDestroy() {
         super.onDestroy()
