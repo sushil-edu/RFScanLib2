@@ -97,7 +97,7 @@ class RFScanLib {
                 log(TAG, e.message.toString(), level.ERROR)
             }
 
-            return RFModel(
+            var rfModel= RFModel(
                 carrierName = carrierName,
                 isHomeNetwork = isHomeNetwork,
                 rsrp = rsrp,
@@ -112,6 +112,8 @@ class RFScanLib {
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
+            log(TAG, "RFData: $rfModel", level.INFO)
+            return rfModel
         }
 
     }
