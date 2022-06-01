@@ -1,14 +1,20 @@
 package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
+import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScanLib
+import com.example.rfscanlib.level
+import com.example.rfscanlib.log
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +44,7 @@ class BackgroundService : Service() {
                     if (latitude != 0.0) {
                         rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
                         rfLiveData.postValue(rfModel)
+                        sendMessageToActivity(rfModel)
                     }
 
                 }
@@ -46,7 +53,12 @@ class BackgroundService : Service() {
         }
     }
 
-
+    private fun sendMessageToActivity(newData: RFModel) {
+        val broadcastIntent = Intent()
+        broadcastIntent.action = "ServiceToActivityAction"
+        broadcastIntent.putExtra("RF", newData.toString())
+        sendBroadcast(broadcastIntent)
+    }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -89,6 +101,7 @@ class BackgroundService : Service() {
                 val location = locationList.last()
                 latitude = location.latitude
                 longitude = location.longitude
+                log(TAG, "Location: $latitude::$longitude", level.INFO )
             }
         }
     }
