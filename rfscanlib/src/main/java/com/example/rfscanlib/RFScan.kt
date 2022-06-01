@@ -18,7 +18,7 @@ import com.example.rfscanlib.service.BackgroundService
 import java.time.LocalDateTime
 import java.util.*
 
-class RFScan {
+class RFScan2 {
 
 
     companion object {
