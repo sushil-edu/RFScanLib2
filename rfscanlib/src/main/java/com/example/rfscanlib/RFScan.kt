@@ -6,6 +6,7 @@ import android.content.Intent
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
@@ -110,7 +111,7 @@ class RFScanLib {
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
-            log(TAG, "RFData: $rfModel", level.INFO)
+            Log.e(TAG, "RFData: $rfModel")
             return rfModel
         }
 

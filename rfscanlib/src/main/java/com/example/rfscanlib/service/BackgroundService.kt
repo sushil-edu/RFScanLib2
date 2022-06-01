@@ -103,7 +103,6 @@ class BackgroundService : Service() {
                 latitude = location.latitude
                 longitude = location.longitude
                 Log.e(TAG, "Location: $latitude::$longitude" )
-                log(TAG, "Location: $latitude::$longitude" , level.INFO)
             }
         }
     }
