@@ -9,8 +9,9 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.example.rfscan.TAG
+import com.example.rfscanlib.TAG
 import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScanLib
 import com.example.rfscanlib.level
@@ -101,7 +102,8 @@ class BackgroundService : Service() {
                 val location = locationList.last()
                 latitude = location.latitude
                 longitude = location.longitude
-                log(TAG, "Location: $latitude::$longitude", level.INFO )
+                Log.e(TAG, "Location: $latitude::$longitude" )
+                log(TAG, "Location: $latitude::$longitude" , level.INFO)
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.rfscan
+package com.example.rfscanlib
 
 import android.annotation.SuppressLint
 import android.content.Context

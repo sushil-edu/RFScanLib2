@@ -7,9 +7,7 @@ import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import androidx.appcompat.app.AppCompatActivity
-import com.example.rfscan.TAG
 import com.example.rfscan.checkPermissions
-import com.example.rfscan.getNetwork
 import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
