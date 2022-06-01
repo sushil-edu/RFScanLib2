@@ -28,7 +28,7 @@ class BackgroundService : Service() {
     companion object {
         var isServiceRunning = false
         var rfLiveData = MutableLiveData<RFModel>()
-        var scanInterval: Int = 0
+        var scanInterval: Int = 5
     }
 
     private val scheduleRFScan = object : Runnable {
