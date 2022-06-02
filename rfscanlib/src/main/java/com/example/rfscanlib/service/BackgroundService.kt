@@ -36,6 +36,7 @@ class BackgroundService : Service() {
        lateinit var rfModel: RFModel
        var rfLiveData = MutableLiveData<RFModel>()
        var interval:Int=0
+       var rfUpdateLocation= MutableLiveData<RFModel>()
    }
 
     private val scheduleRFScan = object : Runnable {
@@ -45,7 +46,6 @@ class BackgroundService : Service() {
                     if (latitude != 0.0) {
                         rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
                         rfLiveData.postValue(rfModel)
-                        sendMessageToActivity(rfModel)
                     }
 
                 }
@@ -54,12 +54,6 @@ class BackgroundService : Service() {
         }
     }
 
-    private fun sendMessageToActivity(newData: RFModel) {
-        val broadcastIntent = Intent()
-        broadcastIntent.action = "ServiceToActivityAction"
-        broadcastIntent.putExtra("RF", newData.toString())
-        sendBroadcast(broadcastIntent)
-    }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -102,7 +96,9 @@ class BackgroundService : Service() {
                 val location = locationList.last()
                 latitude = location.latitude
                 longitude = location.longitude
-                Log.e(TAG, "Location: $latitude::$longitude" )
+                rfUpdateLocation.postValue(RFScanLib.getRFInfo(applicationContext, longitude, latitude))
+             //   Log.e(TAG, "Location: $latitude::$longitude" )
+
             }
         }
     }
