@@ -36,6 +36,7 @@ class BackgroundService : Service() {
        lateinit var rfModel: RFModel
        var rfLiveData = MutableLiveData<RFModel>()
        var interval:Int=0
+       var locationInterval:Int=0
        var rfUpdateLocation= MutableLiveData<RFModel>()
    }
 
@@ -61,7 +62,9 @@ class BackgroundService : Service() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = 5000
+        locationRequest!!.interval = (locationInterval*1000).toLong()
+        locationRequest!!.fastestInterval=(locationInterval*1000).toLong()
+        locationRequest!!.maxWaitTime=(locationInterval*1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)

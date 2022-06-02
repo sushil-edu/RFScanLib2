@@ -6,12 +6,12 @@ import android.content.Intent
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
+import com.example.rfscanlib.service.ForegroundService
 import java.time.LocalDateTime
 import java.util.*
 
@@ -28,14 +28,20 @@ class RFScanLib {
         private var networkType: String = ""
         private var lteBand: String = ""
 
-        fun startService(context: Context?, isBackgroundService: Boolean, interval: Int) {
+        fun startService(
+            context: Context?,
+            isBackgroundService: Boolean,
+            interval: Int, locationInterval:Int
+        ) {
             if (!BackgroundService.isServiceRunning && isBackgroundService) {
                 BackgroundService.interval = interval
+                BackgroundService.locationInterval= locationInterval
                 context?.startForegroundService(Intent(context, BackgroundService::class.java))
                 log(TAG, "Services started", level.INFO)
             } else {
                 stopService(context)
             }
+
         }
 
         fun stopService(context: Context?) {
@@ -96,7 +102,7 @@ class RFScanLib {
                 log(TAG, e.message.toString(), level.ERROR)
             }
 
-            var rfModel= RFModel(
+            return RFModel(
                 carrierName = carrierName,
                 isHomeNetwork = isHomeNetwork,
                 rsrp = rsrp,
@@ -111,8 +117,6 @@ class RFScanLib {
                 localTime = LocalDateTime.now().toString(),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
-            Log.e(TAG, "RFData: $rfModel")
-            return rfModel
         }
 
     }
