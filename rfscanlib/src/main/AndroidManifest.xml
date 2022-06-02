@@ -24,5 +24,6 @@
     <application>
 
        <service android:name=".service.BackgroundService"/>
+        
     </application>
 </manifest>

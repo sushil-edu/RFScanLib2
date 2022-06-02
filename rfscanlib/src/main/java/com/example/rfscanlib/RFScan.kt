@@ -11,7 +11,6 @@ import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
-import com.example.rfscanlib.service.ForegroundService
 import java.time.LocalDateTime
 import java.util.*
 
