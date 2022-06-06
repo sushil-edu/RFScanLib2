@@ -4,15 +4,20 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscanlib.TAG
 import com.example.rfscan.checkPermissions
+import com.example.rfscanlib.Constants.NOTIFICATION_CHANNEL_ID
+import com.example.rfscanlib.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.rfscanlib.RFScanLib
 import com.example.rfscanlib.level
 import com.example.rfscanlib.log
@@ -23,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class BackgroundService : Service() {
+class BackgroundService : LifecycleService() {
 
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
@@ -45,7 +50,7 @@ class BackgroundService : Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                        rfModel = RFScanLib.getRFInfoWithLocation(applicationContext, longitude, latitude)
+                        rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
                         rfLiveData.postValue(rfModel)
                     }
 
@@ -53,11 +58,6 @@ class BackgroundService : Service() {
             }
             mainHandler.postDelayed(this, (interval*1000).toLong())
         }
-    }
-
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
     }
 
     private fun initData() {
@@ -76,9 +76,10 @@ class BackgroundService : Service() {
         mainHandler.post(scheduleRFScan)
 
         startLocationUpdates()
+
         val channelID = "1234"
         val notificationChannel = NotificationChannel(
-            channelID, channelID, NotificationManager.IMPORTANCE_LOW
+            channelID, channelID, IMPORTANCE_LOW
         )
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             notificationChannel
@@ -131,5 +132,7 @@ class BackgroundService : Service() {
         isServiceRunning= false
 
     }
+
+
 
 }
