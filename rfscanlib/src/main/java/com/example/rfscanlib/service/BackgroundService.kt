@@ -42,6 +42,7 @@ class BackgroundService : LifecycleService() {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
                         rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
+                         isServiceRunning = true
                         rfLiveData.postValue(rfModel)
                     }
 
@@ -103,11 +104,7 @@ class BackgroundService : LifecycleService() {
     @SuppressLint("MissingPermission")
     override fun onCreate() {
         super.onCreate()
-
-        isServiceRunning = true
-
         initData()
-
 
     }
 
@@ -118,13 +115,5 @@ class BackgroundService : LifecycleService() {
             this.locationCallback, Looper.myLooper()!!
         )
     }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        isServiceRunning = false
-
-    }
-
 
 }
