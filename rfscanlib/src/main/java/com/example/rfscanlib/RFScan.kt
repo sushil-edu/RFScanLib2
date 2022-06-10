@@ -3,12 +3,14 @@ package com.example.rfscanlib
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
+import com.example.rfscanlib.model.RFLocation
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
 import java.text.SimpleDateFormat
@@ -117,6 +119,11 @@ class RFScanLib {
                 localTime = SimpleDateFormat("yyyy-MM-dd\nHH:mm:ss", Locale.getDefault()).format(Date()),
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
+        }
+
+        fun getLocation(): Location{
+            RFLocation(BackgroundService().latitude, BackgroundService().longitude)
+            return getLocation()
         }
     }
 }
