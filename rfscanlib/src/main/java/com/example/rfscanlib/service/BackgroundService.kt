@@ -5,8 +5,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
+import android.app.Service
 import android.content.Intent
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -19,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class BackgroundService : LifecycleService() {
+class BackgroundService : Service() {
 
     lateinit var mainHandler: Handler
      private var longitude: Double = 0.0
@@ -82,6 +84,10 @@ class BackgroundService : LifecycleService() {
 //            .setSmallIcon(R.mipmap.ic_launcher)
         startForeground(1001, notificationBuilder.build())
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
     }
 
     var locationCallback: LocationCallback = object : LocationCallback() {
