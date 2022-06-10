@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 class BackgroundService : LifecycleService() {
 
     lateinit var mainHandler: Handler
-     var longitude: Double = 0.0
-     var latitude: Double = 0.0
+     private var longitude: Double = 0.0
+    private var latitude: Double = 0.0
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
