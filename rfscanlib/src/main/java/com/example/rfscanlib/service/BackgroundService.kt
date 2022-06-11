@@ -1,76 +1,96 @@
 package com.example.rfscanlib.service
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
-import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.IBinder
 import android.os.Looper
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import com.example.rfscan.checkPermissions
 import com.example.rfscanlib.RFScanLib
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
-class BackgroundService : Service() {
-
-    lateinit var mainHandler: Handler
-     private var longitude: Double = 0.0
+class BackgroundService : LifecycleService() {
+    private var isFirstRun = true
+    private var longitude: Double = 0.0
     private var latitude: Double = 0.0
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
+    private var bgFusedLocationClient: FusedLocationProviderClient? = null
+    private var bgLocationRequest: LocationRequest? = null
 
     companion object {
-        var isServiceRunning = false
-        lateinit var rfModel: RFModel
         var rfLiveData = MutableLiveData<RFModel>()
-        var interval: Int = 0
-        var locationInterval: Int = 0
+        var backgroundServiceInterval: Int = 0
+        var foregroundServiceInterval: Int = 0
         var rfUpdateLocation = MutableLiveData<RFModel>()
-    }
+        const val ACTION_STOP_LISTEN = "action_stop_listen"
 
-    private val scheduleRFScan = object : Runnable {
-        override fun run() {
-            CoroutineScope(Dispatchers.IO).launch {
-                if (checkPermissions(applicationContext)) {
-                    if (latitude != 0.0) {
-                        rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
-                         isServiceRunning = true
-                        rfLiveData.postValue(rfModel)
-                    }
 
-                }
+        fun startService(
+            context: Context?,
+            isBackgroundService: Boolean,
+        ) {
+            if (isBackgroundService) {
+                context?.startForegroundService(Intent(context, BackgroundService::class.java))
             }
-            mainHandler.postDelayed(this, (interval * 1000).toLong())
+        }
+
+        fun stopService(context: Context?) {
+            val intent = Intent(context, BackgroundService::class.java)
+            intent.action = ACTION_STOP_LISTEN
+            context?.startService(intent)
         }
     }
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (locationInterval * 1000).toLong()
-        locationRequest!!.fastestInterval = (locationInterval * 1000).toLong()
-        locationRequest!!.maxWaitTime = (locationInterval * 1000).toLong()
+        locationRequest!!.interval = (foregroundServiceInterval * 1000).toLong()
+        locationRequest!!.fastestInterval = (foregroundServiceInterval * 1000).toLong()
+        locationRequest!!.maxWaitTime = (foregroundServiceInterval * 1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         mFusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(this)
+        //for background service
+        bgLocationRequest = LocationRequest.create()
+        bgLocationRequest!!.interval = (backgroundServiceInterval * 1000).toLong()
+        bgLocationRequest!!.fastestInterval = (backgroundServiceInterval * 1000).toLong()
+        bgLocationRequest!!.maxWaitTime = (backgroundServiceInterval * 1000).toLong()
+        bgLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        bgFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        mainHandler = Handler(Looper.getMainLooper())
 
-        mainHandler.post(scheduleRFScan)
 
+        if (isFirstRun) {
+            fnStartService()
+        }
+
+        //to stop service
+        if (intent?.action != null && intent.action.equals(
+                ACTION_STOP_LISTEN, ignoreCase = true)
+        ) {
+            stopForeground(true)
+            stopSelf()
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun fnStartService() {
         startLocationUpdates()
+        startLocationUpdatesInBG()
+        notification()
+    }
 
+    private fun notification() {
         val channelID = "1234"
         val notificationChannel = NotificationChannel(
             channelID, channelID, IMPORTANCE_LOW
@@ -83,14 +103,9 @@ class BackgroundService : Service() {
             .setContentTitle("RFScanLib")
 //            .setSmallIcon(R.mipmap.ic_launcher)
         startForeground(1001, notificationBuilder.build())
-        return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
-
-    var locationCallback: LocationCallback = object : LocationCallback() {
+    private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -101,7 +116,22 @@ class BackgroundService : Service() {
                 rfUpdateLocation.postValue(RFScanLib.getRFInfo(applicationContext,
                     longitude,
                     latitude))
-                //   Log.e(TAG, "Location: $latitude::$longitude" )
+
+            }
+        }
+    }
+
+    private var locationCallbackBG: LocationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            val locationList = locationResult.locations
+
+            if (locationList.isNotEmpty()) {
+                val location = locationList.last()
+                latitude = location.latitude
+                longitude = location.longitude
+                rfLiveData.postValue(RFScanLib.getRFInfo(applicationContext,
+                    longitude,
+                    latitude))
 
             }
         }
@@ -120,6 +150,32 @@ class BackgroundService : Service() {
             this.locationRequest!!,
             this.locationCallback, Looper.myLooper()!!
         )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdatesInBG() {
+        bgFusedLocationClient!!.requestLocationUpdates(
+            this.bgLocationRequest!!,
+            this.locationCallbackBG, Looper.myLooper()!!
+        )
+    }
+
+    fun isServiceRunning(): Boolean {
+        val serviceClass = BackgroundService::class.java
+        try {
+            val manager =
+                getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            for (service in manager.getRunningServices(
+                Int.MAX_VALUE
+            )) {
+                if (serviceClass.name == service.service.className) {
+                    return true
+                }
+            }
+        } catch (e: Exception) {
+            return false
+        }
+        return false
     }
 
 }

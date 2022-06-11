@@ -2,7 +2,6 @@ package com.example.rfscanlib
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
@@ -10,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscan.checkPermissions
 import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
-import com.example.rfscanlib.service.BackgroundService
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,25 +25,6 @@ class RFScanLib {
         private var pci: Int = 0
         private var networkType: String = ""
         private var lteBand: String = ""
-
-        fun startService(
-            context: Context?,
-            isBackgroundService: Boolean,
-            interval: Int, locationInterval: Int,
-        ) {
-            if (!BackgroundService.isServiceRunning && isBackgroundService) {
-                BackgroundService.interval = interval
-                BackgroundService.locationInterval = locationInterval
-                context?.startForegroundService(Intent(context, BackgroundService::class.java))
-                log(TAG, "Services started", level.INFO)
-            }
-
-        }
-
-        fun stopService(context: Context?) {
-            context?.stopService(Intent(context, BackgroundService::class.java))
-            log(TAG, "Service Stopped", level.INFO)
-        }
 
         @SuppressLint("MissingPermission")
         fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
