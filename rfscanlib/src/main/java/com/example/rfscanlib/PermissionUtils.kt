@@ -1,4 +1,4 @@
-package com.example.rfscan
+package com.example.rfscanlib
 
 import android.Manifest
 import android.content.Context
@@ -26,15 +26,7 @@ fun checkPermissions(context: Context): Boolean {
         ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.READ_SMS
-        ) == PackageManager.PERMISSION_GRANTED /*&&
-        ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED &&
-        ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED*/
+        ) == PackageManager.PERMISSION_GRANTED
     ) {
         return true
     }
@@ -43,7 +35,7 @@ fun checkPermissions(context: Context): Boolean {
 
 const val PERMISSION_ID = 42
 
-fun requestPermissions(context: AppCompatActivity) {
+fun rqstPermissions(context: AppCompatActivity) {
     ActivityCompat.requestPermissions(
         context,
         arrayOf(
@@ -52,8 +44,6 @@ fun requestPermissions(context: AppCompatActivity) {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.READ_SMS,
             Manifest.permission.READ_PHONE_NUMBERS,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//            Manifest.permission.READ_EXTERNAL_STORAGE
         ),
         PERMISSION_ID
     )

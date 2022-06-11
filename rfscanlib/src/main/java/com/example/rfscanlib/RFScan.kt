@@ -2,20 +2,18 @@ package com.example.rfscanlib
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import androidx.appcompat.app.AppCompatActivity
-import com.example.rfscan.checkPermissions
-import com.example.rfscan.requestPermissions
 import com.example.rfscanlib.model.RFModel
+import com.example.rfscanlib.service.BackgroundService
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 class RFScanLib {
-
-
     companion object {
         private var carrierName: String = ""
         private var isHomeNetwork: Boolean = false
@@ -25,6 +23,25 @@ class RFScanLib {
         private var pci: Int = 0
         private var networkType: String = ""
         private var lteBand: String = ""
+
+        fun startService(
+            context: Context?,
+            isBackgroundService: Boolean,
+            backgroundServiceInterval: Int,
+            foregroundServiceInterval: Int,
+        ) {
+            if (isBackgroundService) {
+                BackgroundService.backgroundServiceInterval = backgroundServiceInterval
+                BackgroundService.foregroundServiceInterval = foregroundServiceInterval
+                context?.startForegroundService(Intent(context, BackgroundService::class.java))
+            }
+        }
+
+        fun stopService(context: Context?) {
+            val intent = Intent(context, BackgroundService::class.java)
+            intent.action = BackgroundService.ACTION_STOP_LISTEN
+            context?.startService(intent)
+        }
 
         @SuppressLint("MissingPermission")
         fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
@@ -61,7 +78,7 @@ class RFScanLib {
 
                                 }
                                 else -> {
-                                    log(TAG, "Unknown type of cell signal!", level.ERROR)
+                                    log(TAG, "Unknown type of cell signal!", Level.ERROR)
                                     throw Exception("Unknown type of cell signal!")
                                 }
                             }
@@ -69,14 +86,14 @@ class RFScanLib {
                         }
 
                     } catch (e: Exception) {
-                        log(TAG, e.message.toString(), level.ERROR)
+                        log(TAG, e.message.toString(), Level.ERROR)
                         throw e
                     }
                 } else {
-                    requestPermissions(context as AppCompatActivity)
+                    rqstPermissions(context as AppCompatActivity)
                 }
             } catch (e: Exception) {
-                log(TAG, e.message.toString(), level.ERROR)
+                log(TAG, e.message.toString(), Level.ERROR)
             }
 
             return RFModel(
@@ -96,8 +113,5 @@ class RFScanLib {
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
         }
-
-
     }
-
 }

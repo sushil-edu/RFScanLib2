@@ -27,29 +27,14 @@ class BackgroundService : LifecycleService() {
 
     companion object {
         var rfLiveData = MutableLiveData<RFModel>()
-        var backgroundServiceInterval: Int = 0
-        var foregroundServiceInterval: Int = 0
+        internal var backgroundServiceInterval: Int = 0
+        internal var foregroundServiceInterval: Int = 0
         var rfUpdateLocation = MutableLiveData<RFModel>()
-        const val ACTION_STOP_LISTEN = "action_stop_listen"
-
-
-        fun startService(
-            context: Context?,
-            isBackgroundService: Boolean,
-        ) {
-            if (isBackgroundService) {
-                context?.startForegroundService(Intent(context, BackgroundService::class.java))
-            }
-        }
-
-        fun stopService(context: Context?) {
-            val intent = Intent(context, BackgroundService::class.java)
-            intent.action = ACTION_STOP_LISTEN
-            context?.startService(intent)
-        }
+        internal const val ACTION_STOP_LISTEN = "action_stop_listen"
     }
 
     private fun initData() {
+        //for foreground service
         locationRequest = LocationRequest.create()
         locationRequest!!.interval = (foregroundServiceInterval * 1000).toLong()
         locationRequest!!.fastestInterval = (foregroundServiceInterval * 1000).toLong()
@@ -68,8 +53,6 @@ class BackgroundService : LifecycleService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-
         if (isFirstRun) {
             fnStartService()
         }
@@ -85,8 +68,11 @@ class BackgroundService : LifecycleService() {
     }
 
     private fun fnStartService() {
+
         startLocationUpdates()
+
         startLocationUpdatesInBG()
+
         notification()
     }
 
@@ -146,18 +132,22 @@ class BackgroundService : LifecycleService() {
 
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
+
         mFusedLocationClient!!.requestLocationUpdates(
             this.locationRequest!!,
             this.locationCallback, Looper.myLooper()!!
         )
+
     }
 
     @SuppressLint("MissingPermission")
     private fun startLocationUpdatesInBG() {
+
         bgFusedLocationClient!!.requestLocationUpdates(
             this.bgLocationRequest!!,
             this.locationCallbackBG, Looper.myLooper()!!
         )
+
     }
 
     fun isServiceRunning(): Boolean {

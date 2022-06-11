@@ -2,20 +2,21 @@ package com.example.rfscanlib
 
 import android.util.Log
 
+const val TAG = "RFLib"
 
-enum class level {
+enum class Level {
     DEBUG, ERROR, INFO, WARNING
 }
 
 private var isDebug = BuildConfig.DEBUG
 
-fun log(TAG: String, message: String, typ: level) {
+fun log(TAG: String, message: String, typ: Level) {
     if (isDebug)
         when (typ) {
-            level.DEBUG -> Log.d(TAG, message)
-            level.ERROR -> Log.e(TAG, message)
-            level.INFO -> Log.i(TAG, message)
-            level.WARNING -> Log.w(TAG, message)
+            Level.DEBUG -> Log.d(TAG, message)
+            Level.ERROR -> Log.e(TAG, message)
+            Level.INFO -> Log.i(TAG, message)
+            Level.WARNING -> Log.w(TAG, message)
         }
 }
 
