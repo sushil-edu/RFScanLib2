@@ -3,10 +3,10 @@ package com.example.rfscanlib
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.telephony.*
 import android.telephony.AccessNetworkConstants.EutranBand
-import android.telephony.CellInfoGsm
-import android.telephony.CellInfoLte
-import android.telephony.TelephonyManager
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.rfscanlib.model.RFModel
 import com.example.rfscanlib.service.BackgroundService
@@ -15,6 +15,8 @@ import java.util.*
 
 
 class RFScanLib {
+
+
 
 
     companion object {
@@ -26,6 +28,8 @@ class RFScanLib {
         private var pci: Int = 0
         private var networkType: String = ""
         private var lteBand: String = ""
+
+
 
         fun startService(
             context: Context?,
@@ -46,14 +50,40 @@ class RFScanLib {
             log(TAG, "Service Stopped", Level.INFO)
         }
 
-        @SuppressLint("MissingPermission")
+        @SuppressLint("MissingPermission", "NewApi")
         fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
             try {
                 if (checkPermissions(context)) {
                     val tm: TelephonyManager =
                         context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
-                    val data = tm.allCellInfo
+                    val data= tm.allCellInfo
+                    val cc = tm.signalStrength
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val listCC = cc!!.cellSignalStrengths
+                        for (css in listCC) {
+                            when (css) {
+                                is CellSignalStrengthGsm -> {
+                                    val rssi = css.rssi
+                                    // Log.e("Gsm Rssnr::", "$rssi")
+                                }
+                                is CellSignalStrengthLte -> {
+                                    rsrp = css.rsrp.toDouble()
+                                    rsrq = css.rsrq.toDouble()
+                                    sinr = css.rssnr.toLong()
 
+                                }
+                                is CellSignalStrengthNr -> {
+                                    rsrp = css.csiRsrp.toDouble()
+                                    rsrq = css.csiRsrq.toDouble()
+                                    sinr = css.csiSinr.toLong()
+                                }
+                            }
+                            break
+
+                        }
+                    }else{
+                        sinr = (cc.toString().split(" ")[11]).toLong()
+                    }
                     try {
                         carrierName = tm.networkOperatorName
                         isHomeNetwork = !tm.isNetworkRoaming
@@ -66,7 +96,7 @@ class RFScanLib {
                                     val gsm = info.cellSignalStrength
                                     rsrp = gsm.dbm.toDouble()
                                     rsrq = 0.0
-                                    sinr = 0
+                                    sinr = gsm.rssi.toLong()
                                     lteBand = gsm.level.toString()
                                     pci = 0
                                 }
@@ -78,17 +108,17 @@ class RFScanLib {
                                     val lte = info.cellSignalStrength
                                     rsrp = lte.rsrp.toDouble()
                                     rsrq = lte.rsrq.toDouble()
-                                    sinr = lte.rssnr.toLong()
+                                   /* sinr = lte.rssnr.toLong()*/
                                     lteBand = getBandFromEarfnc(info.cellIdentity.earfcn).toString()
                                     pci = info.cellIdentity.pci
-
                                 }
+
+
                                 else -> {
                                     log(TAG, "Unknown type of cell signal!", Level.ERROR)
                                     throw Exception("Unknown type of cell signal!")
                                 }
                             }
-
                             break
                         }
 
@@ -120,7 +150,8 @@ class RFScanLib {
                 timeZone = Calendar.getInstance().time.toString().split(" ")[4]
             )
         }
-        val INVALID_BAND = -1
+
+        private const val INVALID_BAND = -1
         @SuppressLint("InlinedApi")
         fun getBandFromEarfnc(earfcn: Int): Int {
             when {
@@ -336,7 +367,4 @@ class RFScanLib {
         }
 
     }
-
-
-
 }
