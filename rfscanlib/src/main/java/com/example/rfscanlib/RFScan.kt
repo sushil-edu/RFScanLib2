@@ -56,31 +56,15 @@ class RFScanLib {
                 if (checkPermissions(context)) {
                     val tm: TelephonyManager =
                         context.getSystemService(AppCompatActivity.TELEPHONY_SERVICE) as TelephonyManager
-                    val data= tm.allCellInfo
+                    val info= tm.allCellInfo[0]
                     val cc = tm.signalStrength
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val listCC = cc!!.cellSignalStrengths
-                        for (css in listCC) {
-                            when (css) {
-                                is CellSignalStrengthGsm -> {
-                                    val rssi = css.rssi
-                                    // Log.e("Gsm Rssnr::", "$rssi")
-                                }
+                        when (val css = cc!!.cellSignalStrengths[0]) {
                                 is CellSignalStrengthLte -> {
-                                    rsrp = css.rsrp.toDouble()
-                                    rsrq = css.rsrq.toDouble()
                                     sinr = css.rssnr.toLong()
-
-                                }
-                                is CellSignalStrengthNr -> {
-                                    rsrp = css.csiRsrp.toDouble()
-                                    rsrq = css.csiRsrq.toDouble()
-                                    sinr = css.csiSinr.toLong()
                                 }
                             }
-                            break
 
-                        }
                     }else{
                         sinr = (cc.toString().split(" ")[11]).toLong()
                     }
@@ -88,7 +72,6 @@ class RFScanLib {
                         carrierName = tm.networkOperatorName
                         isHomeNetwork = !tm.isNetworkRoaming
                         networkType = getNetwork(context)
-                        for (info in data) {
 
                             when (info) {
 
@@ -96,7 +79,7 @@ class RFScanLib {
                                     val gsm = info.cellSignalStrength
                                     rsrp = gsm.dbm.toDouble()
                                     rsrq = 0.0
-                                    sinr = gsm.rssi.toLong()
+                                    sinr = 0
                                     lteBand = gsm.level.toString()
                                     pci = 0
                                 }
@@ -119,8 +102,7 @@ class RFScanLib {
                                     throw Exception("Unknown type of cell signal!")
                                 }
                             }
-                            break
-                        }
+
 
                     } catch (e: Exception) {
                         log(TAG, e.message.toString(), Level.ERROR)
