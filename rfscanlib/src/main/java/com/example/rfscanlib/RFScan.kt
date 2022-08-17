@@ -34,11 +34,12 @@ class RFScanLib {
         fun startService(
             context: Context?,
             isBackgroundService: Boolean,
-            interval: Int, locationInterval: Int,
+            interval: Int, locationInterval: Int, icNotification: Int,
         ) {
             if (!BackgroundService.isServiceRunning && isBackgroundService) {
                 BackgroundService.interval = interval
                 BackgroundService.locationInterval = locationInterval
+                BackgroundService.notificationIcon = icNotification
                 context?.startForegroundService(Intent(context, BackgroundService::class.java))
                 log(TAG, "Services started", Level.INFO)
             }

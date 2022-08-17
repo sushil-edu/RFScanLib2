@@ -1,13 +1,16 @@
 package com.example.rfscanlib.service
 
+import android.R
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.NotificationManager.IMPORTANCE_LOW
+import android.app.NotificationManager.*
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscanlib.RFScanLib
@@ -27,6 +30,7 @@ class BackgroundService : LifecycleService() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
+
     companion object {
         var isServiceRunning = false
         lateinit var rfModel: RFModel
@@ -34,6 +38,7 @@ class BackgroundService : LifecycleService() {
         var interval: Int = 0
         var locationInterval: Int = 0
         var rfUpdateLocation = MutableLiveData<RFModel>()
+        var notificationIcon: Int=R.drawable.ic_menu_view
     }
 
     private val scheduleRFScan = object : Runnable {
@@ -64,27 +69,29 @@ class BackgroundService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mainHandler = Handler(Looper.getMainLooper())
-
         mainHandler.post(scheduleRFScan)
-
         startLocationUpdates()
 
         val channelID = "1234"
         val notificationChannel = NotificationChannel(
-            channelID, channelID, IMPORTANCE_LOW
+            channelID, channelID, IMPORTANCE_MIN
         )
+
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             notificationChannel
         )
-        val notificationBuilder = Notification.Builder(this, channelID)
+
+        val notificationBuilder = NotificationCompat.Builder(this, channelID)
             .setContentText("App running in background")
             .setContentTitle("RFScanLib")
-//            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(notificationIcon)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+
         startForeground(1001, notificationBuilder.build())
         return super.onStartCommand(intent, flags, startId)
     }
 
-    var locationCallback: LocationCallback = object : LocationCallback() {
+    private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
 
@@ -115,5 +122,12 @@ class BackgroundService : LifecycleService() {
             this.locationCallback, Looper.myLooper()!!
         )
     }
+
+    /*override fun onDestroy() {
+        rfLiveData.removeObservers(this)
+        rfUpdateLocation.removeObservers(this)
+        super.onDestroy()
+
+    }*/
 
 }
