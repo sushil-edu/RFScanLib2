@@ -7,13 +7,16 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.*
 import android.content.Intent
+import android.location.Criteria
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscanlib.RFScanLib
+import com.example.rfscanlib.TAG
 import com.example.rfscanlib.checkPermissions
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
@@ -59,10 +62,13 @@ class BackgroundService : LifecycleService() {
 
     private fun initData() {
         locationRequest = LocationRequest.create()
-        locationRequest!!.interval = (locationInterval * 1000).toLong()
+        locationRequest!!.interval = (locationInterval * 10000).toLong()
         locationRequest!!.fastestInterval = (locationInterval * 1000).toLong()
         locationRequest!!.maxWaitTime = (locationInterval * 1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest!!.isWaitForAccurateLocation = true
+       // locationRequest!!.expirationTime = (locationInterval*1000).toLong()
+        locationRequest!!.smallestDisplacement = 1.0f
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
     }
@@ -102,7 +108,7 @@ class BackgroundService : LifecycleService() {
                 rfUpdateLocation.postValue(RFScanLib.getRFInfo(applicationContext,
                     longitude,
                     latitude))
-                //   Log.e(TAG, "Location: $latitude::$longitude" )
+//                   Log.e(TAG, "Location: $latitude::$longitude" )
 
             }
         }
@@ -112,14 +118,14 @@ class BackgroundService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         initData()
-
     }
 
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
         mFusedLocationClient!!.requestLocationUpdates(
             this.locationRequest!!,
-            this.locationCallback, Looper.myLooper()!!
+            this.locationCallback,
+            Looper.myLooper()!!
         )
     }
 
