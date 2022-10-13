@@ -13,5 +13,6 @@ data class RFModel(
     var latitude: Double=0.0,
     var timestamp: Long,
     val localTime: String,
-    val timeZone: String
+    val timeZone: String,
+    val accuracy: Float=0.0f
 )

@@ -22,9 +22,12 @@
     <uses-feature android:name="android.hardware.location.gps" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
-    <application>
+    <application
+        android:icon="@drawable/ic_signal">
        <service android:name=".service.BackgroundService"
-        android:foregroundServiceType="location"/>
+        android:foregroundServiceType="location"
+           android:enabled="true"
+           android:exported="true"/>
 
 
     </application>

@@ -2,21 +2,16 @@ package com.example.rfscanlib.service
 
 import android.R
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.NotificationManager.*
+import android.app.NotificationManager.IMPORTANCE_MIN
 import android.content.Intent
-import android.location.Criteria
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import com.example.rfscanlib.RFScanLib
-import com.example.rfscanlib.TAG
 import com.example.rfscanlib.checkPermissions
 import com.example.rfscanlib.model.RFModel
 import com.google.android.gms.location.*
@@ -30,6 +25,7 @@ class BackgroundService : LifecycleService() {
     lateinit var mainHandler: Handler
     private var longitude: Double = 0.0
     private var latitude: Double = 0.0
+    private var accuracy: Float = 0.0f
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
 
@@ -41,7 +37,7 @@ class BackgroundService : LifecycleService() {
         var interval: Int = 0
         var locationInterval: Int = 0
         var rfUpdateLocation = MutableLiveData<RFModel>()
-        var notificationIcon: Int=R.drawable.ic_menu_view
+        var notificationIcon: Int = R.drawable.ic_menu_view
     }
 
     private val scheduleRFScan = object : Runnable {
@@ -49,7 +45,10 @@ class BackgroundService : LifecycleService() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (checkPermissions(applicationContext)) {
                     if (latitude != 0.0) {
-                        rfModel = RFScanLib.getRFInfo(applicationContext, longitude, latitude)
+                        rfModel = RFScanLib.getRFInfo(applicationContext,
+                            longitude,
+                            latitude,
+                            accuracy)
                         isServiceRunning = true
                         rfLiveData.postValue(rfModel)
                     }
@@ -63,12 +62,12 @@ class BackgroundService : LifecycleService() {
     private fun initData() {
         locationRequest = LocationRequest.create()
         locationRequest!!.interval = (locationInterval * 10000).toLong()
-        locationRequest!!.fastestInterval = (locationInterval * 1000).toLong()
-        locationRequest!!.maxWaitTime = (locationInterval * 1000).toLong()
+        locationRequest!!.fastestInterval = ((locationInterval * 1000) / 2).toLong()
+        //locationRequest!!.maxWaitTime = (locationInterval * 1000).toLong()
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        locationRequest!!.isWaitForAccurateLocation = true
-       // locationRequest!!.expirationTime = (locationInterval*1000).toLong()
-        locationRequest!!.smallestDisplacement = 1.0f
+        //locationRequest!!.isWaitForAccurateLocation = true
+        //locationRequest!!.expirationTime = (locationInterval*1000).toLong()
+        //locationRequest!!.smallestDisplacement = 1.0f
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
     }
@@ -89,7 +88,7 @@ class BackgroundService : LifecycleService() {
 
         val notificationBuilder = NotificationCompat.Builder(this, channelID)
             .setContentText("App running in background")
-            .setContentTitle("RFScanLib")
+            .setContentTitle("EagleEye")
             .setSmallIcon(notificationIcon)
             .setVisibility(NotificationCompat.VISIBILITY_SECRET)
 
@@ -103,11 +102,12 @@ class BackgroundService : LifecycleService() {
 
             if (locationList.isNotEmpty()) {
                 val location = locationList.last()
+                accuracy = location.accuracy
                 latitude = location.latitude
                 longitude = location.longitude
                 rfUpdateLocation.postValue(RFScanLib.getRFInfo(applicationContext,
                     longitude,
-                    latitude))
+                    latitude, accuracy))
 //                   Log.e(TAG, "Location: $latitude::$longitude" )
 
             }

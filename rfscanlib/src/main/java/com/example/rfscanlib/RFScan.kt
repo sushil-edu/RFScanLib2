@@ -52,7 +52,7 @@ class RFScanLib {
         }
 
         @SuppressLint("MissingPermission", "NewApi")
-        fun getRFInfo(context: Context, longitude: Double, latitude: Double): RFModel {
+        fun getRFInfo(context: Context, longitude: Double, latitude: Double, accuracy: Float): RFModel {
             try {
                 if (checkPermissions(context)) {
                     val tm: TelephonyManager =
@@ -130,7 +130,8 @@ class RFScanLib {
                 timestamp = Calendar.getInstance().timeInMillis,
                 localTime = SimpleDateFormat("yyyy-MM-dd\nHH:mm:ss", Locale.getDefault()).format(
                     Date()),
-                timeZone = Calendar.getInstance().time.toString().split(" ")[4]
+                timeZone = Calendar.getInstance().time.toString().split(" ")[4],
+                accuracy= accuracy
             )
         }
 
